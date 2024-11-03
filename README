@@ -1,0 +1,5 @@
+to install Vagrant with VirtualBox on Arch Linux:
+
+# pacman -S vagrant virtualbox virtualbox-host-modules-arch
+# for m in vboxdrv vboxnetadp vboxnetflt; do modprobe $m; done
+# make patch-vagrant
