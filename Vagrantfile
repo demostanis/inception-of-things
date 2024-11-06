@@ -1,7 +1,8 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "generic/alpine318"
 
-  config.vm.provision "shell", path: "guests/setup_cgroups.sh"
+  # to share the k3s token between hosts
+  config.vm.synced_folder "shared", "/vagrant"
 
   # k3s server
   config.vm.define "cgodardS" do |server|
@@ -21,8 +22,8 @@ Vagrant.configure("2") do |config|
 
   config.vm.provider "virtualbox" do |vb|
     # as recommended by the subject
-    vb.memory = "512"#MiB
-    vb.cpus = 1
+    vb.memory = "1024"#MiB
+    vb.cpus = 2
   end
 end
 
