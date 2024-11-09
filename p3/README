@@ -1,0 +1,6 @@
+you should use podman instead of docker:
+https://k3d.io/v5.4.0/usage/advanced/podman/
+
+demolinux specific:
+install `fuse-overlayfs` but do not modify /etc/containers/storage.conf
+ensure /var/lib/containers is a symlink to /data/containers
