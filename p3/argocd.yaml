@@ -1,0 +1,40 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: argocd-server
+  namespace: argocd
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/argo-cd`)
+      priority: 10
+      services:
+        - name: argocd-server
+          port: 80
+      middlewares:
+        - name: remove-double-argo-cd
+    - kind: Rule
+      match: >
+        PathPrefix(`/argo-cd`) &&
+        Header(`Content-Type`, `application/grpc`)
+      priority: 11
+      services:
+        - name: argocd-server
+          port: 80
+          scheme: h2c
+
+---
+
+# when authenticating, argo-cd redirects to
+# /argo-cd/argo-cd/applications... :facepalm:
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: remove-double-argo-cd
+  namespace: argocd
+spec:
+  redirectRegex:
+    regex: /argo-cd/argo-cd/(.*)
+    replacement: /argo-cd/$1
