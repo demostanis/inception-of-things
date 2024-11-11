@@ -3,20 +3,20 @@ KUBECTL = sudo kubectl
 HELM = sudo helm -n kube-system
 ARGOCD = sudo argocd
 
-TRAEFIK_VERSION = 32.1.1
+all: cluster-create helm-init argocd-init apply-playground argocd-create-app self-test 
 
 CLUSTER_AGENTS = 1
 CLUSTER_OPTS = --agents $(CLUSTER_AGENTS)
 CLUSTER_OPTS += -p "8888:80@loadbalancer" # expose traefik
 CLUSTER_NAME = mycluster
 
-all: cluster-create helm-init argocd-init apply-playground self-test
-
 cluster-create:
 	$(K3D) cluster create $(CLUSTER_OPTS) $(CLUSTER_NAME) || :
 
 cluster-delete:
 	$(K3D) cluster delete $(CLUSTER_NAME)
+
+TRAEFIK_VERSION = 32.1.1
 
 helm-init:
 	$(HELM) repo add traefik https://traefik.github.io/charts
@@ -28,8 +28,45 @@ argocd-init:
 	$(KUBECTL) create namespace argocd || :
 	$(KUBECTL) apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 	$(KUBECTL) apply -n argocd -f argocd-cmd-params-cm.yaml
-	#$(ARGOCD) admin initial-password -n argocd
 	$(KUBECTL) apply -f argocd.yaml
+
+ARGOCD_REPO = https://github.com/demostanis/amassias-iot.git
+ARGOCD_REPO_SUBDIR = deployment # where to find the .yaml once cloned
+
+argocd-login:
+	$(ARGOCD) login \
+		--grpc-web-root-path /argo-cd \
+		--plaintext --insecure localhost:8888 \
+		--username admin --password $$(while :; do \
+			pass=$$($(ARGOCD) admin initial-password -n argocd \
+				2>/dev/null | head -1); \
+			if [ -n "$$pass" ]; then \
+				echo $$pass; \
+				echo default password: $$pass >&2; \
+				break; \
+			else \
+				sleep 1; \
+			fi \
+		done);
+
+argocd-create-app:
+	while true; do \
+		if $(MAKE) -s argocd-login; then \
+			break; \
+		fi; \
+		echo argocd not yet started...; \
+		sleep 5; \
+	done
+
+	$(ARGOCD) app create playground \
+		--repo $(ARGOCD_REPO) \
+		--path $(ARGOCD_REPO_SUBDIR) \
+		--dest-server https://kubernetes.default.svc \
+		--dest-namespace default --upsert
+	$(MAKE) -s argocd-sync
+
+argocd-sync:
+	$(ARGOCD) app sync playground
 
 create-dev-namespace:
 	$(KUBECTL) create namespace dev || :
