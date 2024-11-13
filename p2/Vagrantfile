@@ -1,0 +1,43 @@
+# Queries variable from environ.
+# If the value is inexistant or empty, exit the program.
+def pull_env(name)
+  var = ENV[name]
+  if var.nil? || var.empty?
+    print "Missing or empty environment variable (#{name})\n"
+    exit! 1
+  end
+  return var
+end
+
+# Config variables
+LOGIN = pull_env 'LOGIN_42'
+SERVER_IP = pull_env 'SERVER_IP'
+
+# Vagrant configuration
+Vagrant.configure("2") do |config|
+  config.vm.box = "generic/alpine318"
+  config.vm.synced_folder "./conf", "/conf"
+
+  # Virtual Box VM config
+  config.vm.provider "virtualbox" do |vbox|
+    vbox.memory = "1024" # MiB
+    vbox.cpus = 1
+  end
+
+  # k3s server
+  config.vm.define "#{LOGIN}S" do |server|
+    server.vm.hostname = "#{LOGIN}S"
+    server.vm.network "private_network", ip: SERVER_IP
+    # Copying ENV file
+    server.vm.provision "file",
+      source: "./.env",
+      destination: "/conf/.env"
+
+    # Setting entry point
+    server.vm.provision "shell",
+      path: "scripts/install.sh"
+  end
+end
+
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
