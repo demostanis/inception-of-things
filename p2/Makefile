@@ -2,7 +2,7 @@
 # Config
 ################################################################################
 
-include .env
+include conf/.env
 
 SERVER_HOSTNAME			=	$(LOGIN_42)S
 WORKER_HOSTNAME			=	$(LOGIN_42)SW
@@ -33,14 +33,20 @@ down: halt # alias
 provision:
 	@$(VAGRANT) provision
 
+test:
+
+# Removes all VM data on disk
+clear:
+	@$(VAGRANT) destroy -f
+	@$(RM) -r .vagrant
+	@$(RM) -r "$(VBOX_PATH)"/$(VBOX_VM_SERVER)_*
+	@$(RM) -r "$(VBOX_PATH)"/$(VBOX_VM_WORKER)_*
+
+# Restarts the VMs
 re: down up
 
-clear: down
-	$(RM) -r .vagrant
-	$(RM) -r "$(VBOX_PATH)"/$(VBOX_VM_SERVER)_*
-	$(RM) -r "$(VBOX_PATH)"/$(VBOX_VM_WORKER)_*
-
-reeee: down clear up
+# Rebuilds the VMs
+rebuild: clear up
 
 ################################################################################
 # SSH Connections

@@ -1,4 +1,4 @@
 #!/usr/bin/sh
 set -a
-source ./.env
+source conf/.env
 exec vagrant "$@"
