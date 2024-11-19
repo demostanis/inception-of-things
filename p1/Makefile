@@ -36,6 +36,7 @@ provision:
 re: down up
 
 clear:
+	@$(VAGRANT) destroy -f
 	$(RM) -r .vagrant
 	$(RM) -r "$(VBOX_PATH)"/$(VBOX_VM_SERVER)_*
 	$(RM) -r "$(VBOX_PATH)"/$(VBOX_VM_WORKER)_*
