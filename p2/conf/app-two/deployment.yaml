@@ -12,6 +12,10 @@ spec:
       labels:
         app: app-two
     spec:
+      volumes:
+        - name: web-volume
+          configMap:
+            name: app-two-web
       containers:
         - name: app-two
           image: nginx:latest
@@ -20,7 +24,10 @@ spec:
           volumeMounts:
             - name: web-volume
               mountPath: /usr/share/nginx/html
-      volumes:
-        - name: web-volume
-          configMap:
-            name: app-two-web
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: 250m
+            limits:
+              memory: "128Mi"
+              cpu: 500m
