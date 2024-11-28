@@ -245,12 +245,16 @@ rebuild()
 # Prerequisites
 #==============================================================================#
 
-# Check if user has root privileges
-sudo -n true >/dev/null 2>&1 || error_root
-
 # Only one argument is expected
 test -z $1 && error_expected_argument
 test -z $2 || error_unexpected_argument
+
+# Check if user has root privileges
+# If the user is not root, rerun as root
+if [ $(id -u) -ne 0 ]
+then
+	exec sudo "$0" $@ || exit 2
+fi
 
 #==============================================================================#
 # Starting in chosen mode
@@ -270,5 +274,4 @@ case "$1" in
 		;;
 esac
 
-$1
-exit $?
+$1 ; exit $?
