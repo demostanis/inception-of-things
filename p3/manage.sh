@@ -125,7 +125,7 @@ health()
 # ArgoCD helpers
 #==============================================================================#
 
-argocd_login()
+argocd_get_password()
 {
 	while true
 	do
@@ -137,6 +137,10 @@ argocd_login()
 		fi
 		sleep 1
 	done
+}
+
+argocd_login()
+{
 	$ARGOCD login											\
 		--grpc-web-root-path /argo-cd						\
 		--plaintext --insecure localhost:8888				\
@@ -181,6 +185,8 @@ initialize_playground()
 
 initialize_argocd_app()
 {
+	argocd_get_password
+
 	while true
 	do
 		if argocd_login >/dev/null 2>&1
