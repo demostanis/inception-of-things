@@ -1,7 +1,7 @@
 you should use podman instead of docker:
 https://k3d.io/v5.4.0/usage/advanced/podman/
 
-pacman -S argocd kubectl fuse-overlayfs podman helm
+pacman -S argocd kubectl fuse-overlayfs podman helm argocd
 paru -S k3d
 
 demolinux specific:
