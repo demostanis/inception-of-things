@@ -1,0 +1,9 @@
+host: gitlab.demolinux.local
+no_prompt: true
+hosts:
+    gitlab.demolinux.local:
+        api_protocol: https
+        api_host: gitlab.demolinux.local
+        token: REPLACE
+# dumbass gitlab
+skip_tls_verify: true

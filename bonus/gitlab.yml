@@ -1,0 +1,25 @@
+# gitlab insists on using SSL
+# but it is handled by traefik
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: my-transport
+  namespace: gitlab
+spec:
+  insecureSkipVerify: true # Skip SSL verification
+
+---
+
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: gitlab-route
+  namespace: gitlab
+spec:
+  routes:
+    - kind: Rule
+      match: Host(`gitlab.demolinux.local`)
+      services:
+        - name: gitlab-nginx-ingress-controller
+          serversTransport: my-transport
+          port: 443
