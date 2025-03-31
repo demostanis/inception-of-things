@@ -61,7 +61,8 @@ setup:
 	[ $$(id -u) = 0 ] || echo setup requires root >&2
 	pacman -S vagrant virtualbox virtualbox-host-modules-arch --noconfirm
 	for m in vboxdrv vboxnetadp vboxnetflt; do modprobe $$m; done
-	$(MAKE) patch-vagrant
+	modprobe -r kvm_intel
+	#$(MAKE) patch-vagrant
 
 patch-vagrant:
 	patch -d $(VAGRANT_INSTALL_PATH) -p0 <$(VAGRANT_PATCH) || \
